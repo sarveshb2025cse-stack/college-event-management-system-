@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Event & Registration Management System with Admin Backend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navigation Bar -->
+    <header class="bg-indigo-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2 rounded-lg text-indigo-100">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight leading-none">CampusEvent Hub</h1>
+                    <span class="text-xs text-indigo-200">OOPs & DBMS Integrated Web System</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex items-center space-x-1 bg-indigo-900/60 p-1 rounded-xl text-xs font-medium border border-indigo-700">
+                <button onclick="app.switchTab('events')" id="tabBtnEvents" class="px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 bg-indigo-600 text-white shadow-sm">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Browse Events</span>
+                </button>
+                <button onclick="app.switchTab('organizer')" id="tabBtnOrganizer" class="px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Organize Event</span>
+                </button>
+                <button onclick="app.switchTab('backend')" id="tabBtnBackend" class="px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800">
+                    <i class="fa-solid fa-database text-amber-400"></i>
+                    <span>Backend / Admin DB</span>
+                </button>
+            </nav>
+
+            <!-- Active User Role Indicator -->
+            <div class="flex items-center space-x-2 bg-indigo-900 border border-indigo-700 px-3 py-1.5 rounded-lg text-xs">
+                <i class="fa-solid fa-user-gear text-indigo-300"></i>
+                <span class="text-indigo-200">Session Mode:</span>
+                <span id="activeRoleLabel" class="font-bold text-amber-300">Student User</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-header Meta Banner -->
+    <div class="bg-white border-b border-slate-200 py-2 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center text-xs text-slate-600 gap-3">
+            <div><i class="fa-solid fa-server text-indigo-600 me-1"></i> <strong>Relational DBMS Engine:</strong> Normalized Storage (Users, Events, Registrations, Payments)</div>
+            <div><i class="fa-solid fa-layer-group text-indigo-600 me-1"></i> <strong>OOP Concepts:</strong> Encapsulation, Inheritance & Polymorphism Class Structure</div>
+            <div><i class="fa-solid fa-calendar-check text-emerald-600 me-1"></i> <strong>Deadline Target:</strong> 10/10/2026</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- VIEW 1: BROWSE & REGISTER FOR EVENTS -->
+        <section id="viewEvents" class="space-y-6">
+            <!-- Filter & Search Controls -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="app.setCategoryFilter('all')" id="catBtnAll" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">All Categories</button>
+                    <button onclick="app.setCategoryFilter('Technical')" id="catBtnTech" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Technical</button>
+                    <button onclick="app.setCategoryFilter('Cultural')" id="catBtnCult" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Cultural</button>
+                    <button onclick="app.setCategoryFilter('Sports')" id="catBtnSports" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Sports</button>
+                    <button onclick="app.setCategoryFilter('Workshop')" id="catBtnWork" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100">Workshop</button>
+                </div>
+                
+                <div class="flex items-center space-x-3 w-full sm:w-auto">
+                    <select id="feeTypeFilter" onchange="app.renderEvents()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">All Access Types (Free & Paid)</option>
+                        <option value="free">Free Events Only</option>
+                        <option value="paid">Payable Events Only</option>
+                    </select>
+
+                    <div class="relative flex-grow sm:flex-grow-0 min-w-[200px]">
+                        <input type="text" id="searchInput" oninput="app.handleSearch(this.value)" placeholder="Search events..." class="w-full text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events List Grid -->
+            <div id="eventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Event cards rendered dynamically via JS OOP engine -->
+            </div>
+        </section>
+
+
+        <!-- VIEW 2: EVENT ORGANIZER / CREATION PORTAL -->
+        <section id="viewOrganizer" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Organizer Creation Form -->
+                <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center">
+                            <i class="fa-solid fa-bullhorn text-indigo-600 me-2"></i> Create New Event
+                        </h3>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-mono">Organiser View</span>
+                    </div>
+
+                    <form id="createEventForm" onsubmit="app.handleCreateEvent(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Event Title *</label>
+                            <input type="text" id="orgTitle" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. AI & ML National Symposium">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Category *</label>
+                                <select id="orgCategory" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                    <option value="Technical">Technical</option>
+                                    <option value="Cultural">Cultural</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Workshop">Workshop</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Max Capacity *</label>
+                                <input type="number" id="orgCapacity" min="1" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 50">
+                            </div>
+                        </div>
+
+                        <!-- Entry / Payment Option Configurator -->
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-3">
+                            <label class="block text-xs font-bold text-indigo-900 uppercase">
+                                <i class="fa-solid fa-credit-card text-indigo-600 me-1"></i> Entry Type / Payment Setting
+                            </label>
+
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <label class="flex items-center space-x-2 bg-white p-2 rounded border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="paymentType" value="free" checked onchange="app.toggleFeeInput(false)" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="font-semibold text-emerald-700">Free Event</span>
+                                </label>
+                                <label class="flex items-center space-x-2 bg-white p-2 rounded border border-slate-200 cursor-pointer">
+                                    <input type="radio" name="paymentType" value="paid" onchange="app.toggleFeeInput(true)" class="text-indigo-600 focus:ring-indigo-500">
+                                    <span class="font-semibold text-amber-700">Payable Event</span>
+                                </label>
+                            </div>
+
+                            <div id="feeAmountContainer" class="hidden">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Registration Fee (₹) *</label>
+                                <input type="number" id="orgFee" min="1" value="100" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Amount in INR">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Date *</label>
+                                <input type="date" id="orgDate" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Venue *</label>
+                                <input type="text" id="orgVenue" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. Main Auditorium">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Organiser Name *</label>
+                            <input type="text" id="orgName" required value="Prof. Sarah Jenkins" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Description *</label>
+                            <textarea id="orgDescription" rows="3" required class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Details about rules, eligibility, and agenda..."></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition shadow">
+                            <i class="fa-solid fa-plus me-1"></i> Publish Event
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Existing Organiser Managed Events List -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-base">Organiser Events Management</h3>
+                        <span id="orgTotalCount" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold">0 Events Active</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-50 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2.5">Event Details</th>
+                                    <th class="px-3 py-2.5">Category</th>
+                                    <th class="px-3 py-2.5">Access Type</th>
+                                    <th class="px-3 py-2.5">Registrations</th>
+                                    <th class="px-3 py-2.5 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="organiserEventsTable" class="divide-y divide-slate-100">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- VIEW 3: BACKEND / ADMIN DATA PORTAL -->
+        <section id="viewBackend" class="hidden space-y-6">
+            
+            <!-- Summary Stats Counters -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs text-slate-500 font-semibold uppercase">Total Events</div>
+                    <div id="backendStatEvents" class="text-2xl font-black text-indigo-600 mt-1">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs text-slate-500 font-semibold uppercase">Total Registrations</div>
+                    <div id="backendStatRegs" class="text-2xl font-black text-slate-800 mt-1">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs text-slate-500 font-semibold uppercase">Payments Paid</div>
+                    <div id="backendStatPaid" class="text-2xl font-black text-emerald-600 mt-1">0</div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="text-xs text-slate-500 font-semibold uppercase">Payments Pending</div>
+                    <div id="backendStatPending" class="text-2xl font-black text-amber-600 mt-1">0</div>
+                </div>
+            </div>
+
+            <!-- Sub Navigation Tabs inside Backend -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-5">
+                <div class="flex flex-wrap justify-between items-center border-b border-slate-200 pb-4 gap-3">
+                    <div class="flex space-x-2">
+                        <button onclick="app.switchBackendSubTab('usersData')" id="subTabUsers" class="px-4 py-2 rounded-lg text-xs font-bold bg-indigo-700 text-white shadow-sm">
+                            <i class="fa-solid fa-users me-1.5"></i> User Registration Data
+                        </button>
+                        <button onclick="app.switchBackendSubTab('organisersData')" id="subTabOrganisers" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100">
+                            <i class="fa-solid fa-user-tie me-1.5"></i> Organiser & Events Data
+                        </button>
+                    </div>
+
+                    <!-- Search Filter for Registrations -->
+                    <div id="backendSearchContainer" class="flex items-center space-x-2 w-full md:w-auto">
+                        <div class="relative flex-grow">
+                            <input type="text" id="backendSearch" oninput="app.renderBackendTables()" placeholder="Search Reg No, Name or Event..." class="text-xs pl-8 pr-3 py-2 border border-slate-300 rounded-lg w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <i class="fa-solid fa-search absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                        </div>
+                        <select id="backendPaymentFilter" onchange="app.renderBackendTables()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-2">
+                            <option value="all">All Payment Statuses</option>
+                            <option value="Paid">Paid Only</option>
+                            <option value="Payment Pending">Payment Pending Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 1: User Registration Data Table -->
+                <div id="backendUsersSection" class="space-y-3">
+                    <div class="flex justify-between items-center text-xs text-slate-500">
+                        <span>Showing real-time database records for student event entries.</span>
+                        <span class="text-indigo-600 font-semibold"><i class="fa-solid fa-info-circle me-1"></i>You can toggle payment statuses directly below.</span>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2.5">Reg ID</th>
+                                    <th class="px-3 py-2.5">Register No.</th>
+                                    <th class="px-3 py-2.5">Student Name</th>
+                                    <th class="px-3 py-2.5">Registered Event</th>
+                                    <th class="px-3 py-2.5">Event Access</th>
+                                    <th class="px-3 py-2.5">Fee Paid</th>
+                                    <th class="px-3 py-2.5">Payment Status</th>
+                                    <th class="px-3 py-2.5">Date & Time</th>
+                                    <th class="px-3 py-2.5 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userRegistrationsTable" class="divide-y divide-slate-100 bg-white">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 2: Organisers Data Table -->
+                <div id="backendOrganisersSection" class="hidden space-y-3">
+                    <div class="text-xs text-slate-500">Overview of all event organizers and published event parameters.</div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                        <table class="w-full text-left text-xs text-slate-600">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="px-3 py-2.5">Event ID</th>
+                                    <th class="px-3 py-2.5">Event Title</th>
+                                    <th class="px-3 py-2.5">Organiser Name</th>
+                                    <th class="px-3 py-2.5">Category</th>
+                                    <th class="px-3 py-2.5">Fee Type</th>
+                                    <th class="px-3 py-2.5">Capacity</th>
+                                    <th class="px-3 py-2.5">Total Registered</th>
+                                    <th class="px-3 py-2.5">Venue & Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="organisersBackendTable" class="divide-y divide-slate-100 bg-white">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: STUDENT EVENT REGISTRATION WITH PAYMENT OPTIONS -->
+    <div id="registerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-slate-100">
+            <div class="bg-indigo-700 text-white px-6 py-4 flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg">Event Registration</h3>
+                    <p class="text-xs text-indigo-200">Provide student credentials and select payment status</p>
+                </div>
+                <button onclick="app.closeRegisterModal()" class="text-indigo-200 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+
+            <form id="registrationForm" onsubmit="app.confirmStudentRegistration(event)" class="p-6 space-y-4">
+                <input type="hidden" id="modalEventId">
+
+                <!-- Display Selected Event Details -->
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded-lg text-xs space-y-1">
+                    <div class="font-bold text-slate-800 text-sm" id="modalEventTitle">Event Title</div>
+                    <div class="text-slate-500 flex justify-between">
+                        <span id="modalEventCategory">Category</span>
+                        <span id="modalEventVenue">Venue</span>
+                    </div>
+                </div>
+
+                <!-- Input: Register Number -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Student Register Number *</label>
+                    <input type="text" id="modalRegNo" required placeholder="e.g. 21BCE0042" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none uppercase font-mono">
+                </div>
+
+                <!-- Input: Student Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Student Full Name *</label>
+                    <input type="text" id="modalStudentName" required placeholder="e.g. Alex Morgan" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <!-- Payment Status Config Box -->
+                <div id="paymentStatusBox" class="p-3.5 rounded-lg border space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-bold uppercase text-slate-700">Fee & Payment Details</label>
+                        <span id="modalFeeBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold">Free</span>
+                    </div>
+
+                    <!-- Options for Payable Events -->
+                    <div id="payableOptions" class="hidden space-y-2 pt-1">
+                        <div class="text-xs text-slate-600">Select payment status for this registration:</div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <label class="flex items-center space-x-2 bg-emerald-50 border border-emerald-200 p-2 rounded cursor-pointer">
+                                <input type="radio" name="modalPaymentStatus" value="Paid" checked class="text-emerald-600 focus:ring-emerald-500">
+                                <div>
+                                    <span class="block font-bold text-emerald-800">Pay Now (Paid)</span>
+                                    <span class="text-[10px] text-emerald-600">Completed Online</span>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center space-x-2 bg-amber-50 border border-amber-200 p-2 rounded cursor-pointer">
+                                <input type="radio" name="modalPaymentStatus" value="Payment Pending" class="text-amber-600 focus:ring-amber-500">
+                                <div>
+                                    <span class="block font-bold text-amber-800">Pay Later</span>
+                                    <span class="text-[10px] text-amber-600">Payment Pending</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Message for Free Events -->
+                    <div id="freeOptionMsg" class="text-xs text-emerald-700 font-semibold flex items-center pt-1">
+                        <i class="fa-solid fa-circle-check me-1.5"></i> Entry is Free! Payment status will automatically be set to <strong>PAID</strong>.
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="app.closeRegisterModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition shadow">Confirm & Register</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl hidden flex items-center space-x-3 z-50 text-xs">
+        <i id="toastIcon" class="fa-solid fa-circle-info text-indigo-400"></i>
+        <span id="toastMsg">Notification message</span>
+    </div>
+
+    <!-- OBJECT-ORIENTED ENGINE AND DATABASE CONTROLLER -->
+    <script>
+        /**
+         * Core OOP Classes
+         */
+
+        // Base Entity Class
+        class UserEntity {
+            #id; #name; #role;
+            constructor(id, name, role) {
+                this.#id = id;
+                this.#name = name;
+                this.#role = role;
+            }
+            getId() { return this.#id; }
+            getName() { return this.#name; }
+            getRole() { return this.#role; }
+        }
+
+        // Student Model inheriting from User Entity
+        class ParticipantStudent extends UserEntity {
+            #registerNo;
+            constructor(id, name, registerNo) {
+                super(id, name, 'Student');
+                this.#registerNo = registerNo.toUpperCase();
+            }
+            getRegisterNo() { return this.#registerNo; }
+        }
+
+        // Encapsulated Event Entity Model
+        class EventModel {
+            #id; #title; #category; #capacity; #registeredCount; #date; #venue; #description; #isPaid; #feeAmount; #organiserName;
+
+            constructor({ id, title, category, capacity, registeredCount = 0, date, venue, description, isPaid = false, feeAmount = 0, organiserName }) {
+                this.#id = id;
+                this.#title = title;
+                this.#category = category;
+                this.#capacity = parseInt(capacity);
+                this.#registeredCount = parseInt(registeredCount);
+                this.#date = date;
+                this.#venue = venue;
+                this.#description = description;
+                this.#isPaid = Boolean(isPaid);
+                this.#feeAmount = parseFloat(feeAmount) || 0;
+                this.#organiserName = organiserName || 'Faculty Organiser';
+            }
+
+            getId() { return this.#id; }
+            getTitle() { return this.#title; }
+            getCategory() { return this.#category; }
+            getCapacity() { return this.#capacity; }
+            getRegisteredCount() { return this.#registeredCount; }
+            getDate() { return this.#date; }
+            getVenue() { return this.#venue; }
+            getDescription() { return this.#description; }
+            getIsPaid() { return this.#isPaid; }
+            getFeeAmount() { return this.#feeAmount; }
+            getOrganiserName() { return this.#organiserName; }
+
+            isFull() { return this.#registeredCount >= this.#capacity; }
+
+            incrementRegistration() {
+                if (this.isFull()) throw new Error("Event capacity reached!");
+                this.#registeredCount++;
+            }
+
+            toJSON() {
+                return {
+                    id: this.#id,
+                    title: this.#title,
+                    category: this.#category,
+                    capacity: this.#capacity,
+                    registeredCount: this.#registeredCount,
+                    date: this.#date,
+                    venue: this.#venue,
+                    description: this.#description,
+                    isPaid: this.#isPaid,
+                    feeAmount: this.#feeAmount,
+                    organiserName: this.#organiserName
+                };
+            }
+        }
+
+        // Registration Entity with Payment Status
+        class RegistrationRecord {
+            #regId; #studentRegNo; #studentName; #eventId; #eventTitle; #isPaidEvent; #feeAmount; #paymentStatus; #timestamp;
+
+            constructor({ regId, studentRegNo, studentName, eventId, eventTitle, isPaidEvent, feeAmount, paymentStatus, timestamp }) {
+                this.#regId = regId;
+                this.#studentRegNo = studentRegNo;
+                this.#studentName = studentName;
+                this.#eventId = eventId;
+                this.#eventTitle = eventTitle;
+                this.#isPaidEvent = isPaidEvent;
+                this.#feeAmount = feeAmount;
+                this.#paymentStatus = paymentStatus; // 'Paid' or 'Payment Pending'
+                this.#timestamp = timestamp || new Date().toLocaleString();
+            }
+
+            getRegId() { return this.#regId; }
+            getStudentRegNo() { return this.#studentRegNo; }
+            getStudentName() { return this.#studentName; }
+            getEventId() { return this.#eventId; }
+            getEventTitle() { return this.#eventTitle; }
+            getIsPaidEvent() { return this.#isPaidEvent; }
+            getFeeAmount() { return this.#feeAmount; }
+            getPaymentStatus() { return this.#paymentStatus; }
+            getTimestamp() { return this.#timestamp; }
+
+            setPaymentStatus(status) {
+                this.#paymentStatus = status;
+            }
+
+            toJSON() {
+                return {
+                    regId: this.#regId,
+                    studentRegNo: this.#studentRegNo,
+                    studentName: this.#studentName,
+                    eventId: this.#eventId,
+                    eventTitle: this.#eventTitle,
+                    isPaidEvent: this.#isPaidEvent,
+                    feeAmount: this.#feeAmount,
+                    paymentStatus: this.#paymentStatus,
+                    timestamp: this.#timestamp
+                };
+            }
+        }
+
+        /**
+         * Database Manager Service (Relational DBMS Abstraction with LocalStorage Persistence)
+         */
+        class DatabaseManager {
+            constructor() {
+                this.dbKeyEvents = 'campus_events_v2';
+                this.dbKeyRegistrations = 'campus_registrations_v2';
+                this.seedInitialData();
+            }
+
+            seedInitialData() {
+                if (!localStorage.getItem(this.dbKeyEvents)) {
+                    const defaultEvents = [
+                        {
+                            id: 'EVT-101',
+                            title: 'National Web Hackathon 2026',
+                            category: 'Technical',
+                            capacity: 40,
+                            registeredCount: 38,
+                            date: '2026-10-15',
+                            venue: 'CS Main Lab',
+                            description: '24-hour coding challenge for web developers and designers.',
+                            isPaid: true,
+                            feeAmount: 250,
+                            organiserName: 'Prof. Sarah Jenkins'
+                        },
+                        {
+                            id: 'EVT-102',
+                            title: 'Inter-College Cultural Dance Night',
+                            category: 'Cultural',
+                            capacity: 200,
+                            registeredCount: 120,
+                            date: '2026-10-18',
+                            venue: 'Open Air Theatre',
+                            description: 'Group dance competitions and music performances.',
+                            isPaid: false,
+                            feeAmount: 0,
+                            organiserName: 'Dr. Robert Vance'
+                        },
+                        {
+                            id: 'EVT-103',
+                            title: 'Robotics Workshop & Expo',
+                            category: 'Workshop',
+                            capacity: 50,
+                            registeredCount: 45,
+                            date: '2026-10-22',
+                            venue: 'Seminar Hall 2',
+                            description: 'Hands-on hardware design with microcontrollers.',
+                            isPaid: true,
+                            feeAmount: 150,
+                            organiserName: 'Prof. Sarah Jenkins'
+                        }
+                    ];
+                    localStorage.setItem(this.dbKeyEvents, JSON.stringify(defaultEvents));
+                }
+
+                if (!localStorage.getItem(this.dbKeyRegistrations)) {
+                    const defaultRegs = [
+                        {
+                            regId: 'REG-8801',
+                            studentRegNo: '21BCE0104',
+                            studentName: 'David Miller',
+                            eventId: 'EVT-101',
+                            eventTitle: 'National Web Hackathon 2026',
+                            isPaidEvent: true,
+                            feeAmount: 250,
+                            paymentStatus: 'Paid',
+                            timestamp: '10/10/2026, 10:30:12 AM'
+                        },
+                        {
+                            regId: 'REG-8802',
+                            studentRegNo: '21ECE0088',
+                            studentName: 'Priya Sharma',
+                            eventId: 'EVT-101',
+                            eventTitle: 'National Web Hackathon 2026',
+                            isPaidEvent: true,
+                            feeAmount: 250,
+                            paymentStatus: 'Payment Pending',
+                            timestamp: '10/10/2026, 11:15:40 AM'
+                        },
+                        {
+                            regId: 'REG-8803',
+                            studentRegNo: '22MECH012',
+                            studentName: 'John Doe',
+                            eventId: 'EVT-102',
+                            eventTitle: 'Inter-College Cultural Dance Night',
+                            isPaidEvent: false,
+                            feeAmount: 0,
+                            paymentStatus: 'Paid',
+                            timestamp: '10/10/2026, 02:45:00 PM'
+                        }
+                    ];
+                    localStorage.setItem(this.dbKeyRegistrations, JSON.stringify(defaultRegs));
+                }
+            }
+
+            // READ Events
+            getEvents() {
+                const data = JSON.parse(localStorage.getItem(this.dbKeyEvents)) || [];
+                return data.map(item => new EventModel(item));
+            }
+
+            getEventById(id) {
+                return this.getEvents().find(e => e.getId() === id) || null;
+            }
+
+            // CREATE Event
+            addEvent(eventObj) {
+                const events = this.getEvents().map(e => e.toJSON());
+                events.push(eventObj.toJSON());
+                localStorage.setItem(this.dbKeyEvents, JSON.stringify(events));
+            }
+
+            // DELETE Event
+            deleteEvent(eventId) {
+                let events = this.getEvents().map(e => e.toJSON());
+                events = events.filter(e => e.id !== eventId);
+                localStorage.setItem(this.dbKeyEvents, JSON.stringify(events));
+
+                // CASCADE DELETE Registrations
+                let regs = this.getRegistrations().map(r => r.toJSON());
+                regs = regs.filter(r => r.eventId !== eventId);
+                localStorage.setItem(this.dbKeyRegistrations, JSON.stringify(regs));
+            }
+
+            // READ Registrations
+            getRegistrations() {
+                const data = JSON.parse(localStorage.getItem(this.dbKeyRegistrations)) || [];
+                return data.map(item => new RegistrationRecord(item));
+            }
+
+            // CHECK DUPLICATE
+            isAlreadyRegistered(studentRegNo, eventId) {
+                return this.getRegistrations().some(r => r.getStudentRegNo() === studentRegNo.toUpperCase() && r.getEventId() === eventId);
+            }
+
+            // INSERT Registration Row
+            registerStudentForEvent({ studentRegNo, studentName, eventId, paymentStatus }) {
+                const event = this.getEventById(eventId);
+                if (!event) throw new Error("Selected event does not exist.");
+                if (event.isFull()) throw new Error("Event capacity is full!");
+                if (this.isAlreadyRegistered(studentRegNo, eventId)) {
+                    throw new Error(`Student ${studentRegNo} is already registered for this event!`);
+                }
+
+                // Increment event registrations count
+                event.incrementRegistration();
+                const allEvents = this.getEvents().map(e => e.getId() === eventId ? event.toJSON() : e.toJSON());
+                localStorage.setItem(this.dbKeyEvents, JSON.stringify(allEvents));
+
+                // Save registration row
+                const regRecord = new RegistrationRecord({
+                    regId: 'REG-' + Math.floor(1000 + Math.random() * 9000),
+                    studentRegNo: studentRegNo.toUpperCase(),
+                    studentName,
+                    eventId,
+                    eventTitle: event.getTitle(),
+                    isPaidEvent: event.getIsPaid(),
+                    feeAmount: event.getFeeAmount(),
+                    paymentStatus: event.getIsPaid() ? paymentStatus : 'Paid',
+                    timestamp: new Date().toLocaleString()
+                });
+
+                const allRegs = this.getRegistrations().map(r => r.toJSON());
+                allRegs.push(regRecord.toJSON());
+                localStorage.setItem(this.dbKeyRegistrations, JSON.stringify(allRegs));
+
+                return regRecord;
+            }
+
+            // UPDATE Payment Status in Backend
+            togglePaymentStatus(regId) {
+                const regs = this.getRegistrations();
+                const record = regs.find(r => r.getRegId() === regId);
+                if (record) {
+                    const newStatus = record.getPaymentStatus() === 'Paid' ? 'Payment Pending' : 'Paid';
+                    record.setPaymentStatus(newStatus);
+                    localStorage.setItem(this.dbKeyRegistrations, JSON.stringify(regs.map(r => r.toJSON())));
+                }
+            }
+        }
+
+        /**
+         * Main Application Web Controller
+         */
+        class AppController {
+            constructor() {
+                this.db = new DatabaseManager();
+                this.activeTab = 'events';
+                this.activeBackendSubTab = 'usersData';
+                this.categoryFilter = 'all';
+                this.searchQuery = '';
+            }
+
+            init() {
+                this.renderEvents();
+                this.renderOrganiserView();
+                this.renderBackendTables();
+            }
+
+            // TAB NAVIGATION
+            switchTab(tabName) {
+                this.activeTab = tabName;
+                ['Events', 'Organizer', 'Backend'].forEach(t => {
+                    const btn = document.getElementById(`tabBtn${t}`);
+                    const view = document.getElementById(`view${t}`);
+                    if (t.toLowerCase() === tabName) {
+                        btn.className = "px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 bg-indigo-600 text-white shadow-sm font-bold";
+                        view.classList.remove('hidden');
+                    } else {
+                        btn.className = "px-3.5 py-2 rounded-lg transition flex items-center space-x-1.5 text-indigo-200 hover:text-white hover:bg-indigo-800";
+                        view.classList.add('hidden');
+                    }
+                });
+
+                const roleLabel = document.getElementById('activeRoleLabel');
+                if (tabName === 'events') roleLabel.innerText = 'Student User';
+                else if (tabName === 'organizer') roleLabel.innerText = 'Event Organizer';
+                else if (tabName === 'backend') roleLabel.innerText = 'System Admin';
+
+                if (tabName === 'events') this.renderEvents();
+                if (tabName === 'organizer') this.renderOrganiserView();
+                if (tabName === 'backend') this.renderBackendTables();
+            }
+
+            switchBackendSubTab(subTab) {
+                this.activeBackendSubTab = subTab;
+                const btnUsers = document.getElementById('subTabUsers');
+                const btnOrg = document.getElementById('subTabOrganisers');
+                const secUsers = document.getElementById('backendUsersSection');
+                const secOrg = document.getElementById('backendOrganisersSection');
+
+                if (subTab === 'usersData') {
+                    btnUsers.className = "px-4 py-2 rounded-lg text-xs font-bold bg-indigo-700 text-white shadow-sm";
+                    btnOrg.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100";
+                    secUsers.classList.remove('hidden');
+                    secOrg.classList.add('hidden');
+                } else {
+                    btnOrg.className = "px-4 py-2 rounded-lg text-xs font-bold bg-indigo-700 text-white shadow-sm";
+                    btnUsers.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100";
+                    secOrg.classList.remove('hidden');
+                    secUsers.classList.add('hidden');
+                }
+            }
+
+            // EVENT RENDERER FOR STUDENTS
+            setCategoryFilter(cat) {
+                this.categoryFilter = cat;
+                ['All', 'Tech', 'Cult', 'Sports', 'Work'].forEach(c => {
+                    const btn = document.getElementById(`catBtn${c}`);
+                    if (btn) btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100";
+                });
+                const activeMap = { 'all': 'catBtnAll', 'Technical': 'catBtnTech', 'Cultural': 'catBtnCult', 'Sports': 'catBtnSports', 'Workshop': 'catBtnWork' };
+                if (activeMap[cat]) document.getElementById(activeMap[cat]).className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200";
+                this.renderEvents();
+            }
+
+            handleSearch(query) {
+                this.searchQuery = query.toLowerCase();
+                this.renderEvents();
+            }
+
+            renderEvents() {
+                const grid = document.getElementById('eventsGrid');
+                grid.innerHTML = '';
+
+                let events = this.db.getEvents();
+                const feeFilter = document.getElementById('feeTypeFilter').value;
+
+                if (this.categoryFilter !== 'all') {
+                    events = events.filter(e => e.getCategory() === this.categoryFilter);
+                }
+
+                if (feeFilter === 'free') events = events.filter(e => !e.getIsPaid());
+                if (feeFilter === 'paid') events = events.filter(e => e.getIsPaid());
+
+                if (this.searchQuery) {
+                    events = events.filter(e => e.getTitle().toLowerCase().includes(this.searchQuery) || e.getVenue().toLowerCase().includes(this.searchQuery));
+                }
+
+                if (events.length === 0) {
+                    grid.innerHTML = `<div class="col-span-3 bg-white p-8 rounded-xl text-center text-slate-400 border border-slate-200">No events found.</div>`;
+                    return;
+                }
+
+                events.forEach(evt => {
+                    const isFull = evt.isFull();
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between hover:shadow-md transition";
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase rounded-full bg-slate-100 text-slate-600">${evt.getCategory()}</span>
+                                ${evt.getIsPaid() ? 
+                                    `<span class="px-2.5 py-0.5 text-xs font-black rounded-full bg-amber-100 text-amber-800 border border-amber-200">₹${evt.getFeeAmount()} Fee</span>` : 
+                                    `<span class="px-2.5 py-0.5 text-xs font-black rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">FREE ENTRY</span>`
+                                }
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base mb-1">${evt.getTitle()}</h3>
+                            <p class="text-slate-500 text-xs mb-3 line-clamp-2">${evt.getDescription()}</p>
+                            
+                            <div class="space-y-1 text-xs text-slate-600 mb-4 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                                <div class="flex justify-between"><span class="text-slate-400">Date:</span> <span class="font-semibold">${evt.getDate()}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Venue:</span> <span class="font-semibold">${evt.getVenue()}</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Organiser:</span> <span>${evt.getOrganiserName()}</span></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="text-slate-500">Seats Available</span>
+                                <span class="${isFull ? 'text-red-500 font-bold' : 'text-slate-700 font-semibold'}">${evt.getRegisteredCount()} / ${evt.getCapacity()}</span>
+                            </div>
+                            <button onclick="app.openRegisterModal('${evt.getId()}')" ${isFull ? 'disabled' : ''} class="w-full ${isFull ? 'bg-slate-200 text-slate-400' : 'bg-indigo-600 hover:bg-indigo-700 text-white'} text-xs font-bold py-2.5 px-3 rounded-lg transition shadow-xs">
+                                ${isFull ? 'Registration Full' : 'Register Now'}
+                            </button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            // REGISTRATION MODAL
+            openRegisterModal(eventId) {
+                const evt = this.db.getEventById(eventId);
+                if (!evt) return;
+
+                document.getElementById('modalEventId').value = evt.getId();
+                document.getElementById('modalEventTitle').innerText = evt.getTitle();
+                document.getElementById('modalEventCategory').innerText = `Category: ${evt.getCategory()}`;
+                document.getElementById('modalEventVenue').innerText = `Venue: ${evt.getVenue()}`;
+
+                const badge = document.getElementById('modalFeeBadge');
+                const payableOptions = document.getElementById('payableOptions');
+                const freeMsg = document.getElementById('freeOptionMsg');
+
+                if (evt.getIsPaid()) {
+                    badge.innerText = `Payable: ₹${evt.getFeeAmount()}`;
+                    badge.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300";
+                    payableOptions.classList.remove('hidden');
+                    freeMsg.classList.add('hidden');
+                } else {
+                    badge.innerText = "Free Access";
+                    badge.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                    payableOptions.classList.add('hidden');
+                    freeMsg.classList.remove('hidden');
+                }
+
+                document.getElementById('registerModal').classList.remove('hidden');
+                document.getElementById('registerModal').classList.add('flex');
+            }
+
+            closeRegisterModal() {
+                document.getElementById('registerModal').classList.add('hidden');
+                document.getElementById('registerModal').classList.remove('flex');
+                document.getElementById('registrationForm').reset();
+            }
+
+            confirmStudentRegistration(e) {
+                e.preventDefault();
+                const eventId = document.getElementById('modalEventId').value;
+                const regNo = document.getElementById('modalRegNo').value;
+                const name = document.getElementById('modalStudentName').value;
+                const paymentStatusRadio = document.querySelector('input[name="modalPaymentStatus"]:checked');
+                const paymentStatus = paymentStatusRadio ? paymentStatusRadio.value : 'Paid';
+
+                try {
+                    const record = this.db.registerStudentForEvent({
+                        studentRegNo: regNo,
+                        studentName: name,
+                        eventId: eventId,
+                        paymentStatus: paymentStatus
+                    });
+
+                    this.showToast(`Registration Successful! ID: ${record.getRegId()}`, "success");
+                    this.closeRegisterModal();
+                    this.renderEvents();
+                    this.renderOrganiserView();
+                    this.renderBackendTables();
+                } catch (err) {
+                    this.showToast(err.message, "error");
+                }
+            }
+
+            // ORGANISER FORM HANDLERS
+            toggleFeeInput(isPaid) {
+                const feeContainer = document.getElementById('feeAmountContainer');
+                if (isPaid) feeContainer.classList.remove('hidden');
+                else feeContainer.classList.add('hidden');
+            }
+
+            handleCreateEvent(e) {
+                e.preventDefault();
+                const paymentType = document.querySelector('input[name="paymentType"]:checked').value;
+                const isPaid = paymentType === 'paid';
+                const feeAmount = isPaid ? document.getElementById('orgFee').value : 0;
+
+                const newEvent = new EventModel({
+                    id: 'EVT-' + Math.floor(100 + Math.random() * 900),
+                    title: document.getElementById('orgTitle').value,
+                    category: document.getElementById('orgCategory').value,
+                    capacity: document.getElementById('orgCapacity').value,
+                    registeredCount: 0,
+                    date: document.getElementById('orgDate').value,
+                    venue: document.getElementById('orgVenue').value,
+                    description: document.getElementById('orgDescription').value,
+                    isPaid: isPaid,
+                    feeAmount: feeAmount,
+                    organiserName: document.getElementById('orgName').value
+                });
+
+                this.db.addEvent(newEvent);
+                this.showToast("Event published successfully!", "success");
+                document.getElementById('createEventForm').reset();
+                this.toggleFeeInput(false);
+                this.renderEvents();
+                this.renderOrganiserView();
+                this.renderBackendTables();
+            }
+
+            renderOrganiserView() {
+                const table = document.getElementById('organiserEventsTable');
+                table.innerHTML = '';
+                const events = this.db.getEvents();
+
+                document.getElementById('orgTotalCount').innerText = `${events.length} Events Active`;
+
+                events.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50";
+                    tr.innerHTML = `
+                        <td class="px-3 py-3">
+                            <div class="font-bold text-slate-800">${e.getTitle()}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${e.getId()} | ${e.getVenue()}</div>
+                        </td>
+                        <td class="px-3 py-3">${e.getCategory()}</td>
+                        <td class="px-3 py-3 font-semibold ${e.getIsPaid() ? 'text-amber-700' : 'text-emerald-700'}">
+                            ${e.getIsPaid() ? `Payable (₹${e.getFeeAmount()})` : 'Free'}
+                        </td>
+                        <td class="px-3 py-3 font-bold">${e.getRegisteredCount()} / ${e.getCapacity()}</td>
+                        <td class="px-3 py-3 text-right">
+                            <button onclick="app.deleteEvent('${e.getId()}')" class="px-2 py-1 text-red-600 hover:bg-red-50 rounded">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    table.appendChild(tr);
+                });
+            }
+
+            deleteEvent(eventId) {
+                if (confirm("Delete this event? All student registrations under this event will be deleted.")) {
+                    this.db.deleteEvent(eventId);
+                    this.showToast("Event deleted.", "info");
+                    this.renderEvents();
+                    this.renderOrganiserView();
+                    this.renderBackendTables();
+                }
+            }
+
+            // BACKEND & ADMIN DATA TABLES
+            renderBackendTables() {
+                const regs = this.db.getRegistrations();
+                const events = this.db.getEvents();
+
+                // Stats calculation
+                document.getElementById('backendStatEvents').innerText = events.length;
+                document.getElementById('backendStatRegs').innerText = regs.length;
+                document.getElementById('backendStatPaid').innerText = regs.filter(r => r.getPaymentStatus() === 'Paid').length;
+                document.getElementById('backendStatPending').innerText = regs.filter(r => r.getPaymentStatus() === 'Payment Pending').length;
+
+                // User Registrations Table
+                const userTable = document.getElementById('userRegistrationsTable');
+                userTable.innerHTML = '';
+
+                const search = document.getElementById('backendSearch').value.toLowerCase();
+                const statusFilter = document.getElementById('backendPaymentFilter').value;
+
+                let filteredRegs = regs;
+                if (statusFilter !== 'all') {
+                    filteredRegs = filteredRegs.filter(r => r.getPaymentStatus() === statusFilter);
+                }
+                if (search) {
+                    filteredRegs = filteredRegs.filter(r => 
+                        r.getStudentRegNo().toLowerCase().includes(search) ||
+                        r.getStudentName().toLowerCase().includes(search) ||
+                        r.getEventTitle().toLowerCase().includes(search)
+                    );
+                }
+
+                if (filteredRegs.length === 0) {
+                    userTable.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-slate-400">No student registration records found.</td></tr>`;
+                } else {
+                    filteredRegs.forEach(r => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50";
+                        const isPending = r.getPaymentStatus() === 'Payment Pending';
+
+                        tr.innerHTML = `
+                            <td class="px-3 py-3 font-mono font-bold text-slate-500">${r.getRegId()}</td>
+                            <td class="px-3 py-3 font-mono font-bold text-indigo-700">${r.getStudentRegNo()}</td>
+                            <td class="px-3 py-3 font-semibold text-slate-800">${r.getStudentName()}</td>
+                            <td class="px-3 py-3 font-medium">${r.getEventTitle()}</td>
+                            <td class="px-3 py-3">${r.getIsPaidEvent() ? '<span class="text-amber-700 font-bold">Payable</span>' : '<span class="text-emerald-700 font-bold">Free</span>'}</td>
+                            <td class="px-3 py-3 font-semibold">₹${r.getFeeAmount()}</td>
+                            <td class="px-3 py-3">
+                                ${isPending ? 
+                                    '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-300">Payment Pending</span>' : 
+                                    '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">Paid</span>'
+                                }
+                            </td>
+                            <td class="px-3 py-3 text-slate-400 text-[10px]">${r.getTimestamp()}</td>
+                            <td class="px-3 py-3 text-center">
+                                ${r.getIsPaidEvent() ? `
+                                    <button onclick="app.togglePaymentStatus('${r.getRegId()}')" class="px-2 py-1 text-[10px] font-bold rounded ${isPending ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-200 text-slate-700'}">
+                                        ${isPending ? 'Mark Paid' : 'Set Pending'}
+                                    </button>
+                                ` : '<span class="text-slate-300 text-[10px]">N/A (Free)</span>'}
+                            </td>
+                        `;
+                        userTable.appendChild(tr);
+                    });
+                }
+
+                // Organisers Backend Table
+                const orgTable = document.getElementById('organisersBackendTable');
+                orgTable.innerHTML = '';
+                events.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50";
+                    tr.innerHTML = `
+                        <td class="px-3 py-3 font-mono font-bold text-slate-500">${e.getId()}</td>
+                        <td class="px-3 py-3 font-bold text-slate-800">${e.getTitle()}</td>
+                        <td class="px-3 py-3 text-slate-600">${e.getOrganiserName()}</td>
+                        <td class="px-3 py-3">${e.getCategory()}</td>
+                        <td class="px-3 py-3 font-semibold">${e.getIsPaid() ? `Paid (₹${e.getFeeAmount()})` : 'Free'}</td>
+                        <td class="px-3 py-3">${e.getCapacity()} Seats</td>
+                        <td class="px-3 py-3 font-bold text-indigo-700">${e.getRegisteredCount()}</td>
+                        <td class="px-3 py-3 text-slate-500">${e.getVenue()} (${e.getDate()})</td>
+                    `;
+                    orgTable.appendChild(tr);
+                });
+            }
+
+            togglePaymentStatus(regId) {
+                this.db.togglePaymentStatus(regId);
+                this.showToast("Payment status updated in database.", "info");
+                this.renderBackendTables();
+            }
+
+            showToast(msg, type = "info") {
+                const toast = document.getElementById('toast');
+                const toastMsg = document.getElementById('toastMsg');
+                const toastIcon = document.getElementById('toastIcon');
+
+                toastMsg.innerText = msg;
+                if (type === "error") toastIcon.className = "fa-solid fa-triangle-exclamation text-red-400";
+                else if (type === "success") toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+                else toastIcon.className = "fa-solid fa-circle-info text-indigo-400";
+
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 3500);
+            }
+        }
+
+        // Initialize App Engine
+        const app = new AppController();
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
